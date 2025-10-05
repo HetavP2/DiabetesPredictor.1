@@ -43,3 +43,31 @@ class PatientData(BaseModel):
             raise ValueError("missing value")
         return float(v)
 
+class BatchRequest(BaseModel):
+    samples: List[PatientData]
+
+# check model is loaded
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "model": MODEL_PATH.name,
+        "threshold": threshold
+    }
+
+# predict based on input features given by user
+@app.post("/predict")
+def predict_one(payload: PatientData):
+    try:
+        x = numpy.array([[
+            payload.Pregnancies, payload.Glucose, payload.BloodPressure,
+            payload.SkinThickness, payload.Insulin, payload.BMI,
+            payload.DiabetesPedigreeFunction, payload.Age
+        ]], dtype=numpy.float32)
+        x_scaled = scaler.transform(x)
+        prob = float(model.predict(x_scaled, verbose=0).ravel()[0])
+
+        # predict diabetes
+        return {"probability": prob, "prediction": int(prob >= threshold), "threshold": threshold}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Inference error: {e}")
