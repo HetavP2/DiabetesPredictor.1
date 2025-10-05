@@ -4,4 +4,7 @@ imbalanced-learn
 numpy
 pandas
 matplotlib
+joblib
 fastapi
+uvicorn
+pydantic
