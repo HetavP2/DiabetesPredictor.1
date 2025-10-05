@@ -26,3 +26,20 @@ threshold = 0.5
 # use fastapi (build web app) and setup model
 app = FastAPI(title="Diabetes Prediction API", version="1.0")
 
+# initialize 8 input features and ensure post request to predict has these values
+class PatientData(BaseModel):
+    Pregnancies: float = Field(..., description="Number of pregnancies")
+    Glucose: float = Field(..., description="Plasma glucose concentration")
+    BloodPressure: float = Field(..., description="Diastolic blood pressure (mm Hg)")
+    SkinThickness: float = Field(..., description="Triceps skinfold thickness (mm)")
+    Insulin: float = Field(..., description="2-Hour serum insulin (mu U/ml)")
+    BMI: float = Field(..., description="Body mass index")
+    DiabetesPedigreeFunction: float = Field(..., description="Diabetes pedigree function")
+    Age: float = Field(..., description="Age (years)")
+
+    @field_validator("*", mode="before")
+    def ensure_num(cls, v):
+        if v is None:
+            raise ValueError("missing value")
+        return float(v)
+
